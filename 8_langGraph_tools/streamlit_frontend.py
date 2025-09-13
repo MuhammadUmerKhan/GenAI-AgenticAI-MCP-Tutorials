@@ -1,6 +1,6 @@
 import streamlit as st
-from langgraph_backend import chatbot, get_all_threads
-from langchain_core.messages import HumanMessage, AIMessage
+from langgraph_backend_tools import chatbot, get_all_threads
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 import uuid
 
 # **************************************** Page Config ******************** **********
@@ -24,7 +24,23 @@ def add_thread(thread_id):
 
 def load_conversation(thread_id):
     state = chatbot.get_state(config={'configurable': {'thread_id': thread_id}})
-    return state.values.get('messages', [])
+    messages = state.values.get('messages', [])
+    temp_messages = []
+    for msg in messages:
+        if isinstance(msg, HumanMessage):
+            role = 'user'
+        elif isinstance(msg, AIMessage):
+            role = 'assistant'
+        elif isinstance(msg, ToolMessage):
+            role = 'tool'
+        else:
+            role = 'unknown'
+        temp_messages.append({
+            'role': role,
+            'content': msg.content,
+            'tool_name': getattr(msg, 'name', 'tool') if role == 'tool' else None
+        })
+    return temp_messages
 
 # **************************************** Session Setup ******************************
 
@@ -268,6 +284,15 @@ st.markdown("""
         box-shadow: 0 0 6px rgba(72, 187, 120, 0.5);
     }
     
+    .stStatus {
+        background: linear-gradient(135deg, #2D3748 0%, #4A5568 100%);
+        color: #E8E8E8;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        margin: 12px 0;
+        padding: 16px 20px;
+    }
+    
     .status-typing {
         background-color: #ED8936;
         animation: pulse 1.5s infinite;
@@ -334,15 +359,7 @@ if st.session_state['chat_threads']:
     for i, thread_id in enumerate(st.session_state['chat_threads']):
         if st.sidebar.button(thread_id, key=f"thread_{thread_id}", help=f"Load conversation {thread_id}"):
             st.session_state['thread_id'] = thread_id
-            messages = load_conversation(thread_id)
-            temp_messages = []
-            for msg in messages:
-                role = 'user' if isinstance(msg, HumanMessage) else 'assistant'
-                temp_messages.append({
-                    'role': role,
-                    'content': msg.content,
-                })
-            st.session_state['message_history'] = temp_messages
+            st.session_state['message_history'] = load_conversation(thread_id)
             st.rerun()
 else:
     st.sidebar.markdown("""
@@ -377,34 +394,31 @@ if not st.session_state['message_history']:
 
 # Display conversation history with enhanced styling
 for message in st.session_state['message_history']:
-    with st.chat_message(message['role'], avatar="🧑‍💻" if message['role'] == 'user' else "🤖"):
-        st.markdown(message['content'])
+    if message['role'] in ['user', 'assistant']:
+        with st.chat_message(message['role'], avatar="🧑‍💻" if message['role'] == 'user' else "🤖"):
+            st.markdown(message['content'])
+    elif message['role'] == 'tool':
+        with st.status(f"🔧 Tool: {message['tool_name']}", state="complete", expanded=False):
+            st.write(f"**Result**: {message['content']}")
 
 # Enhanced chat input with placeholder
 user_input = st.chat_input('💬 Type your message here... (Press Enter to send)')
 
 if user_input:
-    # Add user message with timestamp
-    st.session_state['message_history'].append({
-        'role': 'user',
-        'content': user_input,
-    })
-    with st.chat_message('user', avatar="🧑‍💻"):
+    # Show user's message
+    st.session_state["message_history"].append({"role": "user", "content": user_input})
+    with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(user_input)
 
-    # config thread_id for session
-    # CONFIG = {'configurable': {'thread_id': st.session_state['thread_id']}}
-    
-    # config thread_id for session and observablity in LangSmith
     CONFIG = {
-                'configurable': {'thread_id': st.session_state['thread_id']},
-                'metadata': {'thread_id': st.session_state['thread_id']},
-                'run_name': "chat_turn" # -> Optional
-            }
+        "configurable": {"thread_id": st.session_state["thread_id"]},
+        "metadata": {"thread_id": st.session_state["thread_id"]},
+        "run_name": "chat_turn",
+    }
 
-    # Show typing indicator and stream response
+    # Assistant streaming block
     with st.chat_message("assistant", avatar="🤖"):
-        # Create a placeholder for the typing indicator
+        # Show typing indicator
         typing_placeholder = st.empty()
         typing_placeholder.markdown("""
             <div style="display: flex; align-items: center; color: #A0AEC0; font-style: italic;">
@@ -412,13 +426,38 @@ if user_input:
                 <span class="loading-dots">AI is thinking</span>
             </div>
         """, unsafe_allow_html=True)
-        
+
+        # Use a mutable holder so the generator can set/modify it
+        status_holder = {"box": None}
+
         def ai_only_stream():
             for message_chunk, metadata in chatbot.stream(
                 {"messages": [HumanMessage(content=user_input)]},
                 config=CONFIG,
-                stream_mode="messages"
+                stream_mode="messages",
             ):
+                # Lazily create & update the SAME status container when any tool runs
+                if isinstance(message_chunk, ToolMessage):
+                    tool_name = getattr(message_chunk, "name", "tool")
+                    if status_holder["box"] is None:
+                        status_holder["box"] = st.status(
+                            f"🔧 Using `{tool_name}` …", expanded=True
+                        )
+                    else:
+                        status_holder["box"].update(
+                            label=f"🔧 Using `{tool_name}` …",
+                            state="running",
+                            expanded=True,
+                        )
+                    # Display and store tool result
+                    status_holder["box"].write(f"**Result**: {message_chunk.content}")
+                    st.session_state["message_history"].append({
+                        "role": "tool",
+                        "content": message_chunk.content,
+                        "tool_name": tool_name
+                    })
+
+                # Stream ONLY assistant tokens
                 if isinstance(message_chunk, AIMessage):
                     yield message_chunk.content
 
@@ -426,11 +465,16 @@ if user_input:
         typing_placeholder.empty()
         ai_message = st.write_stream(ai_only_stream())
 
-        # Add the assistant message to history
-        st.session_state['message_history'].append({
-            'role': 'assistant',
-            'content': ai_message,
-        })  
-    
-    # Auto-scroll to bottom (this will be handled by Streamlit's chat interface)
+        # Finalize only if a tool was actually used
+        if status_holder["box"] is not None:
+            status_holder["box"].update(
+                label="✅ Tool finished", state="complete", expanded=False
+            )
+
+        # Save assistant message
+        st.session_state["message_history"].append(
+            {"role": "assistant", "content": ai_message}
+        )
+
+    # Auto-scroll to bottom
     st.rerun()

@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from langgraph.checkpoint.sqlite import SqliteSaver
 import os, sqlite3
 
+os.environ["LANGCHAIN_PROJECT"] = "langGraph_practice"
+
 _ = load_dotenv()
 
 class ChatState(TypedDict):

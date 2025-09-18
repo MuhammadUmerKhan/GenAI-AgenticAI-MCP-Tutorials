@@ -14,6 +14,7 @@ dependencies = [
     "jupyterlab-widgets>=3.0.15",
     "langchain>=0.3.27",
     "langchain-community>=0.3.29",
+    "langchain-experimental>=0.3.4",
     "langchain-groq>=0.3.7",
     "langchain-huggingface>=0.3.1",
     "langchain-openai>=0.3.33",

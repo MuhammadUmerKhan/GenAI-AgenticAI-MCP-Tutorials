@@ -11,6 +11,7 @@ name = "agentic-ai-tutorial"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiosqlite" },
     { name = "beautifulsoup4" },
     { name = "chromadb" },
     { name = "ddgs" },
@@ -48,6 +49,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "beautifulsoup4", specifier = ">=4.13.5" },
     { name = "chromadb", specifier = ">=1.1.0" },
     { name = "ddgs", specifier = ">=9.5.5" },

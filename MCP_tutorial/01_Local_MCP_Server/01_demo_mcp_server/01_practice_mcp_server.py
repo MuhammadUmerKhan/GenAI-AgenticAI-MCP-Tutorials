@@ -2,7 +2,7 @@ import random
 from fastmcp import FastMCP
 
 # Create MCP server instance
-mcp = FastMCP(name="Demo Server")
+mcp = FastMCP(name="Demo Server (Roll Dice / Add Two Numbers)")
 
 @mcp.tool
 def roll_dice(n_dice: int = 1) -> list[int]:

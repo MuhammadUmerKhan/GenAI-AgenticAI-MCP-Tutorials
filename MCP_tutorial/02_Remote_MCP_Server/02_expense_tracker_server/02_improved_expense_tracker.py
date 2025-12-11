@@ -1,7 +1,7 @@
 
 from fastmcp import FastMCP
 import os
-import aiosqlite
+import aiosqlite, sqlite3
 import asyncio
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "database", "expense_tracker.db")
@@ -9,9 +9,9 @@ CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), "database", "categorie
 
 mcp = FastMCP(name="Expense Tracker")
 
-async def init_db():
-    async with aiosqlite.connect(DB_PATH) as c:
-        await c.execute("""
+def init_db():
+    with sqlite3.connect(DB_PATH) as c:
+        c.execute("""
             CREATE TABLE IF NOT EXISTS expenses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT NOT NULL,
@@ -21,19 +21,9 @@ async def init_db():
                 note TEXT DEFAULT ''
             );
         """)
-        await c.commit()
+        c.commit()
 
-# Smart initialization that works in both cases:
-#  - When the script is run directly (no loop yet) → use asyncio.run()
-#  - When imported by FastMCP (loop already running) → create_task()
-try:
-    loop = asyncio.get_running_loop()
-except RuntimeError:  # no running event loop
-    asyncio.run(init_db())
-else:
-    # there is already a running loop (FastMCP case)
-    loop.create_task(init_db())
-
+init_db()
 
 @mcp.tool
 async def add_expense(date: str, amount: float, category: str = "", subcategory: str = "", note: str = "") -> dict:

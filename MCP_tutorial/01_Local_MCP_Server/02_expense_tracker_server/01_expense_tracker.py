@@ -1,12 +1,12 @@
 from fastmcp import FastMCP
 from pathlib import Path
-import sqlite3, aiosqlite
+import sqlite3
 
 # Proper paths
 DB_PATH = Path(__file__).parent / "database" / "expense_tracker.db"
 CATEGORIES_PATH = Path(__file__).parent / "database" / "categories.json"
 
-mcp = FastMCP(name="Expense Tracker (Async)")
+mcp = FastMCP(name="Expense Tracker")
 
 def init_db():
     # Ensure database directory exists
@@ -35,19 +35,19 @@ def init_db():
 init_db()
 
 @mcp.tool
-async def add_expense(date: str, amount: float, category: str = "", subcategory: str = "", note: str = "") -> dict:
+def add_expense(date: str, amount: float, category: str = "", subcategory: str = "", note: str = "") -> dict:
     """Add a new expense to the database."""
-    async with aiosqlite.connect(DB_PATH) as c:
-        await c.execute("PRAGMA synchronous = NORMAL")  # Good for each connection
-        cur = await c.execute(
+    with sqlite3.connect(DB_PATH) as c:
+        c.execute("PRAGMA synchronous = NORMAL")  # Good for each connection
+        cur = c.execute(
             "INSERT INTO expenses (date, amount, category, subcategory, note) VALUES (?, ?, ?, ?, ?)",
             (date, amount, category, subcategory, note)
         )
-        await c.commit()
+        c.commit()
         return {"status": "success", "id": cur.lastrowid}
 
 @mcp.tool
-async def list_expense(start_date: str = "", end_date: str = "") -> list[dict]:
+def list_expense(start_date: str = "", end_date: str = "") -> list[dict]:
     """List all expenses from the database ordered by date."""
     # Default to full range if dates are empty
     if not start_date:
@@ -55,8 +55,8 @@ async def list_expense(start_date: str = "", end_date: str = "") -> list[dict]:
     if not end_date:
         end_date = "9999-12-31"
 
-    async with aiosqlite.connect(DB_PATH) as c:
-        cur = await c.execute(
+    with sqlite3.connect(DB_PATH) as c:
+        cur = c.execute(
             """
             SELECT id, date, amount, category, subcategory, note
             FROM expenses
@@ -66,11 +66,11 @@ async def list_expense(start_date: str = "", end_date: str = "") -> list[dict]:
             (start_date, end_date)
         )
         cols = [description[0] for description in cur.description]
-        rows = await cur.fetchall()
+        rows = cur.fetchall()
         return [dict(zip(cols, row)) for row in rows]
 
 @mcp.tool
-async def summarize(start_date: str, end_date: str, category: str | None = None) -> list[dict]:
+def summarize(start_date: str, end_date: str, category: str | None = None) -> list[dict]:
     """Summarize expenses by category within an inclusive date range."""
     query = """
         SELECT category, SUM(amount) AS total_amount
@@ -85,10 +85,10 @@ async def summarize(start_date: str, end_date: str, category: str | None = None)
 
     query += " GROUP BY category ORDER BY total_amount DESC"
 
-    async with aiosqlite.connect(DB_PATH) as c:
-        cur = await c.execute(query, params)
+    with sqlite3.connect(DB_PATH) as c:
+        cur = c.execute(query, params)
         cols = [description[0] for description in cur.description]
-        rows = await cur.fetchall()
+        rows = cur.fetchall()
         return [dict(zip(cols, row)) for row in rows]
 
 @mcp.resource("expense://categories", mime_type="application/json")
@@ -100,9 +100,12 @@ def categories():
     with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
+# For local testing
 if __name__ == "__main__":
-    mcp.run(transport="http", host="0.0.0.0", port=8000)
-    # for running the server: fastmcp run 01_practice_mcp_server.py --transport http --host 0.0.0.0 --port 8000 or uv run 01_practice_mcp_server.py
-    # In debugging mode: uv run fastmcp dev 01_practice_mcp_server.py
+    # Test with correct date format: YYYY-MM-DD
+    # print(add_expense("2025-01-01", 100.0, "Food", "Groceries", "Grocery store"))
+    # print(list_expense("2025-01-01", "2025-12-31"))
+    # Or test all: print(list_expense())
     
-    # For Deployment visit fastmcp.cloud and deploy the server
+    # Uncomment to run the MCP server locally
+    mcp.run()

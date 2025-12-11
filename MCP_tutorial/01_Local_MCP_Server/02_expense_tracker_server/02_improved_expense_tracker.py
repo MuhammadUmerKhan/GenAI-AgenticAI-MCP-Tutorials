@@ -100,9 +100,12 @@ def categories():
     with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
+# For local testing
 if __name__ == "__main__":
-    mcp.run(transport="http", host="0.0.0.0", port=8000)
-    # for running the server: fastmcp run 01_practice_mcp_server.py --transport http --host 0.0.0.0 --port 8000 or uv run 01_practice_mcp_server.py
-    # In debugging mode: uv run fastmcp dev 01_practice_mcp_server.py
+    # Test with correct date format: YYYY-MM-DD
+    # print(add_expense("2025-01-01", 100.0, "Food", "Groceries", "Grocery store"))
+    # print(list_expense("2025-01-01", "2025-12-31"))
+    # Or test all: print(list_expense())
     
-    # For Deployment visit fastmcp.cloud and deploy the server
+    # Uncomment to run the MCP server locally
+    mcp.run()

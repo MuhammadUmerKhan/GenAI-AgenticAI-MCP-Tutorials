@@ -1,3 +1,4 @@
+from typing import Optional, Dict, Any
 from fastmcp import FastMCP
 from pathlib import Path
 import sqlite3, aiosqlite
@@ -90,6 +91,152 @@ async def summarize(start_date: str, end_date: str, category: str | None = None)
         cols = [description[0] for description in cur.description]
         rows = await cur.fetchall()
         return [dict(zip(cols, row)) for row in rows]
+
+@mcp.tool
+async def delete_expense(
+    id: Optional[int] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    category: Optional[str] = None,
+    subcategory: Optional[str] = None,
+    amount: Optional[float] = None,
+) -> dict:
+    """Delete expenses matching the provided filters (combined with AND). At least one filter is required."""
+    async with aiosqlite.connect(DB_PATH) as c:
+        where_clauses = []
+        params = []
+
+        if id is not None:
+            where_clauses.append("id = ?")
+            params.append(id)
+
+        if start_date:
+            where_clauses.append("date >= ?")
+            params.append(start_date)
+
+        if end_date:
+            where_clauses.append("date <= ?")
+            params.append(end_date)
+
+        if category:
+            where_clauses.append("category = ?")
+            params.append(category)
+
+        if subcategory:
+            where_clauses.append("subcategory = ?")
+            params.append(subcategory)
+
+        if amount is not None:
+            where_clauses.append("amount = ?")
+            params.append(amount)
+
+        if not where_clauses:
+            raise ValueError("At least one filter must be provided to avoid deleting all expenses.")
+
+        where = " AND ".join(where_clauses)
+        query = f"DELETE FROM expenses WHERE {where}"
+
+        cur = await c.execute(query, params)
+        await c.commit()
+        deleted = cur.rowcount
+
+        return {
+            "status": "success" if deleted > 0 else "no_match",
+            "deleted_count": deleted
+        }
+
+@mcp.tool
+async def edit_expense(
+# ── Filters (to find which expense(s) to edit) ─────────────────────────────────
+    id: Optional[int] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    category: Optional[str] = None,
+    subcategory: Optional[str] = None,
+    amount: Optional[float] = None,
+    note_contains: Optional[str] = None,
+
+# ── Fields to update (only provide the ones you want to change) ───────────────
+    new_date: Optional[str] = None,
+    new_amount: Optional[float] = None,
+    new_category: Optional[str] = None,
+    new_subcategory: Optional[str] = None,
+    new_note: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Edit one or more expenses matching the filters.
+    Only the 'new_*' fields you provide will be updated.
+    At least one filter is required (prevents accidental mass updates).
+    """
+    if all(f is None for f in [id, start_date, end_date, category, subcategory, amount, note_contains]):
+        raise ValueError("At least one filter must be provided to select which expense(s) to edit.")
+    
+    # Build WHERE clause (same logic as delete_expense)
+    where_clauses = []
+    params = []
+    
+    if id is not None:
+        where_clauses.append("id = ?")
+        params.append(id)
+    if start_date:
+        where_clauses.append("date >= ?")
+        params.append(start_date)
+    if end_date:
+        where_clauses.append("date <= ?")
+        params.append(end_date)
+    if category:
+        where_clauses.append("category = ?")
+        params.append(category)
+    if subcategory:
+        where_clauses.append("subcategory = ?")
+        params.append(subcategory)
+    if amount is not None:
+        where_clauses.append("amount = ?")
+        params.append(amount)
+    if note_contains:
+        where_clauses.append("note LIKE ?")
+        params.append(f"%{note_contains}%")
+        
+    where_sql = " AND ".join(where_clauses)
+    
+    # Build SET clause – only include fields that are not None
+    set_clauses = []
+    set_params = []
+    
+    if new_date is not None:
+        set_clauses.append("date = ?")
+        set_params.append(new_date)
+    if new_amount is not None:
+        set_clauses.append("amount = ?")
+        set_params.append(new_amount)
+    if new_category is not None:
+        set_clauses.append("category = ?")
+        set_params.append(new_category)
+    if new_subcategory is not None:
+        set_clauses.append("subcategory = ?")
+        set_params.append(new_subcategory)
+    if new_note is not None:
+        set_clauses.append("note = ?")
+        set_params.append(new_note)
+    
+    if not set_clauses:
+        raise ValueError("At least one field to update must be provided.")
+    
+    set_sql = ", ".join(set_clauses)
+    query = f"UPDATE expenses SET {set_sql} WHERE {where_sql}"
+    all_params = set_params + params
+    
+    async with aiosqlite.connect(DB_PATH) as c:
+        cur = await c.execute(query, all_params)
+        await c.commit()
+        updated_count = cur.rowcount
+        
+    status = "success" if updated_count > 0 else "no_match"
+    return {
+        "status": status,
+        "updated_count": updated_count,
+        "message": f"Updated {updated_count} expense(s)." if updated_count else "No expenses matched the filters."
+    }
 
 @mcp.resource("expense://categories", mime_type="application/json")
 def categories():

@@ -128,9 +128,15 @@ def categories():
     except Exception as e:
         return f'{{"error": "Could not load categories: {str(e)}"}}'
 
+# Start the server
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=8000)
-    # for running the server: fastmcp run 01_practice_mcp_server.py --transport http --host 0.0.0.0 --port 8000 or uv run 01_practice_mcp_server.py
-    # In debugging mode: uv run fastmcp dev 01_practice_mcp_server.py
+    # mcp.run()
+    
+    # for running the server: fastmcp run main.py --transport http --host 0.0.0.0 --port 8000 or uv run main.py
+    # In debugging mode: uv run fastmcp dev main.py
     
     # For Deployment visit fastmcp.cloud and deploy the server
+    
+    # For free Claude-desktop trail, use the 02_proxy.py file to run the remote server locally
+    #   - uv run fastmcp install claude-desktop 02_proxy.py

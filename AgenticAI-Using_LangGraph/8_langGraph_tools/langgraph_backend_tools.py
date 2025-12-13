@@ -1,5 +1,3 @@
-# backend.py
-
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage
@@ -50,8 +48,6 @@ def calculator(first_num: float, second_num: float, operation: str) -> dict:
         return {"first_num": first_num, "second_num": second_num, "operation": operation, "result": result}
     except Exception as e:
         return {"error": str(e)}
-
-
 
 
 @tool

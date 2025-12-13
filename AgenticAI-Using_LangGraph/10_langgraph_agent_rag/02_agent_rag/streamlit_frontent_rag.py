@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph_rag_backend import (
     chatbot,
     ingest_pdf,
-    retrieve_all_threads,
+    get_all_threads,
     thread_document_metadata,
 )
 
@@ -41,7 +41,7 @@ if "thread_id" not in st.session_state:
     st.session_state["thread_id"] = generate_thread_id()
 
 if "chat_threads" not in st.session_state:
-    st.session_state["chat_threads"] = retrieve_all_threads()
+    st.session_state["chat_threads"] = get_all_threads()
 
 if "ingested_docs" not in st.session_state:
     st.session_state["ingested_docs"] = {}

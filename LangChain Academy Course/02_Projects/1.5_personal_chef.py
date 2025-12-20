@@ -33,3 +33,5 @@ agent = create_agent(
     system_prompt=system_prompt,
     checkpointer=InMemorySaver(),
 )
+
+#  follow this: https://docs.langchain.com/langsmith/local-server

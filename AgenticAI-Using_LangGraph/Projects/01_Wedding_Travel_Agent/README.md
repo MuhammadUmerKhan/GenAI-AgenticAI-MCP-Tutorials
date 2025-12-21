@@ -104,6 +104,9 @@ async def main():
 asyncio.run(main())
 ```
 
+## Svg Diagram:
+<img src="../../../assets//wedding_planner_agent.svg" width="1000" height="750" />
+
 ## Why This Architecture is Advanced
 
 - **No legacy `create_agent`** → full control

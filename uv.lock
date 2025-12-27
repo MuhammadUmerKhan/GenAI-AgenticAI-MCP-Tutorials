@@ -52,6 +52,7 @@ dependencies = [
     { name = "streamlit" },
     { name = "tavily" },
     { name = "tiktoken" },
+    { name = "trustcall" },
     { name = "wikipedia" },
     { name = "youtube-transcript-api" },
 ]
@@ -99,6 +100,7 @@ requires-dist = [
     { name = "streamlit", specifier = ">=1.52.1" },
     { name = "tavily", specifier = ">=1.1.0" },
     { name = "tiktoken", specifier = ">=0.12.0" },
+    { name = "trustcall", specifier = ">=0.0.39" },
     { name = "wikipedia", specifier = ">=1.4.0" },
     { name = "youtube-transcript-api", specifier = ">=1.2.3" },
 ]
@@ -930,6 +932,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9d/a4/e44218c2b394e31a6dd0d6b095c4e1f32d0be54c2a4b250032d717647bab/durationpy-0.10.tar.gz", hash = "sha256:1fa6893409a6e739c9c72334fc65cca1f355dbdd93405d30f726deb5bde42fba", size = 3335, upload-time = "2025-05-17T13:52:37.26Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b0/0d/9feae160378a3553fa9a339b0e9c1a048e147a4127210e286ef18b730f03/durationpy-0.10-py3-none-any.whl", hash = "sha256:3b41e1b601234296b4fb368338fdcd3e13e0b4fb5b67345948f4f2bf9868b286", size = 3922, upload-time = "2025-05-17T13:52:36.463Z" },
+]
+
+[[package]]
+name = "dydantic"
+version = "0.0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/08/c5/2d097e5a4816b15186c1ae06c5cfe3c332e69a0f3556dc6cee2d370acf2a/dydantic-0.0.8.tar.gz", hash = "sha256:14a31d4cdfce314ce3e69e8f8c7c46cbc26ce3ce4485de0832260386c612942f", size = 8115, upload-time = "2025-01-29T20:36:13.771Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7a/7c/a1b120141a300853d82291faf0ba1a95133fa390e4b7d773647b69c8c0f4/dydantic-0.0.8-py3-none-any.whl", hash = "sha256:cd0a991f523bd8632699872f1c0c4278415dd04783e36adec5428defa0afb721", size = 8637, upload-time = "2025-01-29T20:36:12.217Z" },
 ]
 
 [[package]]
@@ -2162,7 +2176,7 @@ wheels = [
 
 [[package]]
 name = "langgraph-api"
-version = "0.6.14"
+version = "0.6.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
@@ -2192,9 +2206,9 @@ dependencies = [
     { name = "uvicorn" },
     { name = "watchfiles" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/2a/61962f43ce243b02db55f072ea9f07827c0101759854044a1b11df2d604f/langgraph_api-0.6.14.tar.gz", hash = "sha256:6d855b6efc72ac8440152dcd9eeee63940945503ac1ca2373e7bc1f13e2ea8c3", size = 417545, upload-time = "2025-12-25T03:51:02.834Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/95/d2f8d28382b28d2b9f9bbbc58f0b4edaf20f9d8611e57047ae0a4026b1ad/langgraph_api-0.6.15.tar.gz", hash = "sha256:e7e2f6db7180793da0aa982ce2fe3c0c0ab65297239a47fa6b3481eae967970a", size = 417699, upload-time = "2025-12-26T04:00:35.614Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/31/bc1c42ef641136e2216cea481b87224ffc2cb69358a9daa8c71630c8ef15/langgraph_api-0.6.14-py3-none-any.whl", hash = "sha256:699251ea506746dea80318b8403d798ba9b71786b4197b82c9ae41915c8dedf9", size = 321938, upload-time = "2025-12-25T03:51:01.573Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/1b/552520f69d66d4f866f807123e914be40467e5dd584be6be2a31cc97ee6e/langgraph_api-0.6.15-py3-none-any.whl", hash = "sha256:155c3e2cde940398516885763ec2282e62afec1638f4b0418cd77afa69dc0c65", size = 322037, upload-time = "2025-12-26T04:00:34.559Z" },
 ]
 
 [[package]]
@@ -5187,6 +5201,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/37/92/e97fcc6b2c27cdb87ce5ee063d77f8f26f19f06916aa680464c8104ef0f6/triton-3.5.1-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0b4d2c70127fca6a23e247f9348b8adde979d2e7a20391bfbabaac6aebc7e6a8", size = 170579924, upload-time = "2025-11-11T17:41:12.455Z" },
     { url = "https://files.pythonhosted.org/packages/a4/e6/c595c35e5c50c4bc56a7bac96493dad321e9e29b953b526bbbe20f9911d0/triton-3.5.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d0637b1efb1db599a8e9dc960d53ab6e4637db7d4ab6630a0974705d77b14b60", size = 170480488, upload-time = "2025-11-11T17:41:18.222Z" },
     { url = "https://files.pythonhosted.org/packages/16/b5/b0d3d8b901b6a04ca38df5e24c27e53afb15b93624d7fd7d658c7cd9352a/triton-3.5.1-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bac7f7d959ad0f48c0e97d6643a1cc0fd5786fe61cb1f83b537c6b2d54776478", size = 170582192, upload-time = "2025-11-11T17:41:23.963Z" },
+]
+
+[[package]]
+name = "trustcall"
+version = "0.0.39"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dydantic" },
+    { name = "jsonpatch" },
+    { name = "langgraph" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2b/72/4cdb54a31952827e8b58e11ea286bbfe2d3aa0ffb77a2f87dbc1c7ea77d3/trustcall-0.0.39.tar.gz", hash = "sha256:ec315818224501b9537ce6b7618dbc21be41210c6e8f2e239169a5a00912cd6e", size = 38637, upload-time = "2025-04-14T22:02:50.857Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2c/3a/58de925a104ce554fc250b833fe76401c7822aa8d65f2002cb53195e6c64/trustcall-0.0.39-py3-none-any.whl", hash = "sha256:d7da42e0bba816c0539b2936dfed90ffb3ea8d789e548e73865d416f8ac4ee64", size = 30073, upload-time = "2025-04-14T22:02:49.402Z" },
 ]
 
 [[package]]

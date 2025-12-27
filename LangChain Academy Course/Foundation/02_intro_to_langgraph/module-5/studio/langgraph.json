@@ -1,0 +1,11 @@
+{
+  "dockerfile_lines": [],
+  "graphs": {
+    "parallel_graph": "./01_memory_store.py:graph"
+  },
+  "env": "../../../../../.env",
+  "python_version": "3.12",
+  "dependencies": [
+    "../../../../../.venv"
+  ]
+}

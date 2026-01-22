@@ -116,6 +116,7 @@ class KnowledgeBase:
         """
         Check if the stored data for a coin is older than max_age_minutes.
         Handles ISO 8601 timestamps with +00:00 or Z suffix.
+        Returns True if stale, False if fresh.
         """
         data = self.search_coin(coin)
         if not data or not data.get('fetch_timestamp'):
@@ -153,7 +154,6 @@ if __name__ == "__main__":
     api_response_example = {
         "symbol": "BTC",
         "last_price": "89851.53",
-        "last_btc": "1",
         "lowest_price": "87932.07",
         "highest_price": "90099.5",
         "date": "2026-01-21 09:29:30",
@@ -162,15 +162,15 @@ if __name__ == "__main__":
         "fetch_timestamp": datetime.now(UTC).isoformat()
     } 
 
-    # if api_response_example:
-    #     full_record = {
-    #         "coin": "Bitcoin",               # ← you provide this
-    #         **api_response_example           # spread API fields
-    #     }
-    #     kb.add_coin(full_record)
+    if api_response_example:
+        full_record = {
+            "coin": "Bitcoin",               # ← you provide this
+            **api_response_example           # spread API fields
+        }
+        kb.add_coin(full_record)
 
     # Or update only some fields
     # kb.update_coin("Bitcoin", {"last_price": 90500.0, "fetch_timestamp": datetime.now(UTC).isoformat()})
 
-    print(kb.is_stale("Bitcoin"))
+    # print(kb.is_stale("Bitcoin"))
     # print(json.dumps(kb.search_coin("Bitcoin"), indent=2, default=str))

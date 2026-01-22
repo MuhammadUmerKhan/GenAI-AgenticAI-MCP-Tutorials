@@ -114,18 +114,33 @@ class KnowledgeBase:
 
     def is_stale(self, coin: str, max_age_minutes: int = 5) -> bool:
         """
-        Convenience method: check if data is older than max_age_minutes.
-        Uses fetch_timestamp (ISO format).
+        Check if the stored data for a coin is older than max_age_minutes.
+        Handles ISO 8601 timestamps with +00:00 or Z suffix.
         """
         data = self.search_coin(coin)
         if not data or not data.get('fetch_timestamp'):
             return True
 
+        ts_str = data['fetch_timestamp']
+
         try:
-            ts = datetime.fromisoformat(data['fetch_timestamp'].replace('Z', '+00:00'))
-            age = datetime.now(UTC) - ts
-            return age.total_seconds() > (max_age_minutes * 60)
-        except (ValueError, TypeError):
+            # This handles both '2026-01-21T06:51:17.373354+00:00' and without microseconds
+            stored_time = datetime.fromisoformat(ts_str)
+            
+            # Make sure it's timezone-aware (should be, but defensive)
+            if stored_time.tzinfo is None:
+                stored_time = stored_time.replace(tzinfo=UTC)
+                
+            now = datetime.now(UTC)
+            age = now - stored_time
+            age_seconds = age.total_seconds()
+            
+            print(f"Age for {coin} is {age_seconds} seconds")
+            return age_seconds > (max_age_minutes * 60)
+            
+        except (ValueError, TypeError) as e:
+            # If timestamp is malformed → treat as stale
+            print(f"Warning: Invalid fetch_timestamp for {coin}: {ts_str} ({e})")
             return True
 
 # ────────────────────────────────────────────────
@@ -157,4 +172,5 @@ if __name__ == "__main__":
     # Or update only some fields
     # kb.update_coin("Bitcoin", {"last_price": 90500.0, "fetch_timestamp": datetime.now(UTC).isoformat()})
 
-    print(json.dumps(kb.search_coin("Bitcoin"), indent=2, default=str))
+    print(kb.is_stale("Bitcoin"))
+    # print(json.dumps(kb.search_coin("Bitcoin"), indent=2, default=str))

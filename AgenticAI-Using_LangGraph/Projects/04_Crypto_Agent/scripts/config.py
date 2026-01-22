@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Constants
 DB_PATH = "../database/crypto_kb.db"

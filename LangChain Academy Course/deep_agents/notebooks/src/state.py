@@ -54,4 +54,4 @@ class DeepAgentState(AgentState):
     """
 
     todos: NotRequired[List[ToDo]]
-    files: Annotated[NotRequired[Dict[str, str]], file_reducer]
+    files: Annotated[NotRequired[Dict[str, str]], lambda a, b: {**a, **b}]

@@ -95,7 +95,7 @@ RESEARCH_SYSTEM_PROMPT = """
     - Deduplicate by URL.
 """
 
-ORCH_SYSTEM = """
+ORCH_SYSTEM_PROMPT = """
     You are a senior technical writer and developer advocate.
     Your job is to produce a highly actionable outline for a technical blog post.
 
@@ -131,7 +131,7 @@ ORCH_SYSTEM = """
     Output must strictly match the Plan schema.
 """
 
-WORKER_SYSTEM = """
+WORKER_SYSTEM_PROMPT = """
     You are a senior technical writer and developer advocate.
     Write ONE section of a technical blog post in Markdown.
 

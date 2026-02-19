@@ -159,3 +159,32 @@ isuse_prompt = ChatPromptTemplate.from_messages(
         ),
     ]
 )
+
+# ============================== Rewrite for Retrieval Prompt =================================
+# This prompt guides the agent to rewrite the user's question into a query optimized for vector retrieval over internal company PDFs.
+rewrite_for_retrieval_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Rewrite the user's QUESTION into a query optimized for vector retrieval over INTERNAL company PDFs.\n\n"
+            "Rules:\n"
+            "- Keep it short (6–16 words).\n"
+            "- Preserve key entities (e.g., NexaAI, plan names).\n"
+            "- Add 2–5 high-signal keywords that likely appear in policy/pricing docs.\n"
+            "- Remove filler words.\n"
+            "- Do NOT answer the question.\n"
+            "- Output JSON with key: retrieval_query\n\n"
+            "Examples:\n"
+            "Q: 'Do NexaAI plans include a free trial?'\n"
+            "-> {{'retrieval_query': 'NexaAI free trial duration trial period plans'}}\n\n"
+            "Q: 'What is NexaAI refund policy?'\n"
+            "-> {{'retrieval_query': 'NexaAI refund policy cancellation refund timeline charges'}}"
+        ),
+        (
+            "human",
+            "QUESTION:\n{question}\n\n"
+            "Previous retrieval query:\n{retrieval_query}\n\n"
+            "Answer (if any):\n{answer}"
+        ),
+    ]
+)

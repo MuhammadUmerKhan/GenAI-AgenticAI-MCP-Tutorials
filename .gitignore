@@ -13,3 +13,6 @@ wheels/
 
 # enviroment variable
 .env
+
+# Guardrails
+.guardrails

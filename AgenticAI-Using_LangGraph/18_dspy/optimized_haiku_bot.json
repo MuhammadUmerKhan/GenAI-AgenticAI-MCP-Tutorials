@@ -1,0 +1,34 @@
+{
+  "traces": [],
+  "train": [],
+  "demos": [],
+  "signature": {
+    "instructions": "Given the fields `location`, `mood`, `season`, produce the fields `haiku`.",
+    "fields": [
+      {
+        "prefix": "Location:",
+        "description": "The setting of the poem"
+      },
+      {
+        "prefix": "Mood:",
+        "description": "${mood}"
+      },
+      {
+        "prefix": "Season:",
+        "description": "${season}"
+      },
+      {
+        "prefix": "Haiku:",
+        "description": "${haiku}"
+      }
+    ]
+  },
+  "lm": null,
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.2.1",
+      "cloudpickle": "3.1"
+    }
+  }
+}
